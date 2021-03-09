@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <item
+        android:id="@+id/menu_busy"
+        android:orderInCategory="100"
+        android:title="@string/menu_scan"
+        android:titleCondensed="@string/menu_scan"
+        android:actionLayout="@layout/progress_bar"
+        tools:ignore="AlwaysShowAction,AppCompatResource"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_scan"
+        android:orderInCategory="100"
+        android:title="@string/menu_scan"
+        android:titleCondensed="@string/menu_scan"
+        android:showAsAction="always"
+        tools:ignore="AlwaysShowAction,AppCompatResource" />
+    <item
+        android:id="@+id/menu_stop"
+        android:orderInCategory="101"
+        android:title="@string/menu_stop"
+        android:titleCondensed="@string/menu_stop"
+        android:showAsAction="always"
+        tools:ignore="AlwaysShowAction,AppCompatResource" />
+</menu>
