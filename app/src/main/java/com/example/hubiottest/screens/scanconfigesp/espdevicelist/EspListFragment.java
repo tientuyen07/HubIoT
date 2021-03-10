@@ -313,7 +313,7 @@ public class EspListFragment extends AbstractFragment
                 switch (action) {
                     case BluetoothLeService.ACTION_GATT_CONNECTED:
                         Log.e("TESTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", BluetoothLeService.ACTION_GATT_CONNECTED);
-                        Log.e("TEN cua thiet bi:", mBluetoothDevice.getName());
+//                        Log.e("TEN cua thiet bi:", mBluetoothDevice.getName()==null?"NULL":mBluetoothDevice.getName());
                         mViewMvc.showTextViewPaired(true);
 //                        if (mPairedDevice.size() > 0 && !mPairedDevice.contains(mBluetoothDevice)) {
 //                            mPairedDevice.add(mBluetoothDevice);
@@ -323,6 +323,8 @@ public class EspListFragment extends AbstractFragment
 
                         if (mBluetoothDevice != null) {
                             startActivityConfigEsp(mBluetoothDevice);
+                        }else {
+                            Log.e("TESTTTTTTTTTTTTTTT", "mBluetoothDevice null");
                         }
                         break;
                     case BluetoothLeService.ACTION_GATT_DISCONNECTED:
@@ -355,6 +357,7 @@ public class EspListFragment extends AbstractFragment
     };
 
     private void startActivityConfigEsp(BluetoothDevice mBluetoothDevice) {
+        Log.e("startActivityConfigEsp", String.valueOf(mBluetoothDevice.getType()));
         if ((mBluetoothDevice.getType() == BluetoothDevice.DEVICE_TYPE_CLASSIC)
                 || (mBluetoothDevice.getType() == BluetoothDevice.DEVICE_TYPE_DUAL)) {
             final Intent intent = new Intent(requireActivity(), ConfigBTDualActivity.class);
@@ -363,6 +366,13 @@ public class EspListFragment extends AbstractFragment
 
             startActivity(intent);
         } else if (mBluetoothDevice.getType() == BluetoothDevice.DEVICE_TYPE_LE) {
+            final Intent intent = new Intent(requireActivity(), ConfigBLEDeviceActivity.class);
+            intent.putExtra(EXTRAS_DEVICE, mBluetoothDevice);
+            intent.putExtra(EXTRAS_DEVICE_NAME, mBluetoothDevice.getName());
+            intent.putExtra(EXTRAS_DEVICE_ADDRESS, mBluetoothDevice.getAddress());
+
+            startActivity(intent);
+        } else {
             final Intent intent = new Intent(requireActivity(), ConfigBLEDeviceActivity.class);
             intent.putExtra(EXTRAS_DEVICE, mBluetoothDevice);
             intent.putExtra(EXTRAS_DEVICE_NAME, mBluetoothDevice.getName());

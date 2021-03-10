@@ -36,7 +36,11 @@ public class BluetoothLeService extends Service {
 
     private final String serviceUUID = "00001800-0000-1000-8000-00805f9b34fb";
     //"4fafc201-1fb5-459e-8fcc-c5c9c331914b\"
-    private final String wifiUUID = "0002AAA-0000-1000-8000-00805f9b34fb";
+    private final String READ_NAME_HUB_UUID = "00002a00-0000-1000-8000-00805f9b34fb";
+    private final String xxxUUID = "00002a25-0000-1000-8000-00805f9b34fb";
+    private final String yyyUUID = "00002a01-0000-1000-8000-00805f9b34fb";
+    private final String zzzUUID = "00002a04-0000-1000-8000-00805f9b34fb";
+    private final String tttUUID = "00002aa6-0000-1000-8000-00805f9b34fb";
 
     public final static String ACTION_GATT_CONNECTED =
             "ACTION_GATT_CONNECTED";
@@ -278,7 +282,10 @@ public class BluetoothLeService extends Service {
         }
         /*get the read characteristic from the service*/
         BluetoothGattCharacteristic mReadCharacteristic = mCustomService.
-                getCharacteristic(UUID.fromString(wifiUUID));
+                getCharacteristic(UUID.fromString(xxxUUID));
+//        for (BluetoothGattCharacteristic temp : mReadCharacteristic) {
+//            Log.e("Characteristic: ", temp.getUuid().toString());
+//        }
         if (!mBluetoothGatt.readCharacteristic(mReadCharacteristic)) {
             Log.w(TAG, "Failed to read characteristic");
             return;
@@ -301,7 +308,7 @@ public class BluetoothLeService extends Service {
         }
         /*get the read characteristic from the service*/
         BluetoothGattCharacteristic mWriteCharacteristic = mCustomService
-                .getCharacteristic(UUID.fromString(wifiUUID));
+                .getCharacteristic(UUID.fromString(READ_NAME_HUB_UUID));
         mWriteCharacteristic.setValue(wifiCredentials);
         if (!mBluetoothGatt.writeCharacteristic(mWriteCharacteristic)) {
             Log.w(TAG, "Failed to write characteristic");

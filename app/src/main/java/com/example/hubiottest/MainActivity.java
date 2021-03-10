@@ -89,4 +89,9 @@ public class MainActivity extends AbstractActivity implements
         return mViewMvc.isDrawerOpen();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 }
