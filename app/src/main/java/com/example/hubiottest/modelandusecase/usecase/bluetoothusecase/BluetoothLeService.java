@@ -17,6 +17,7 @@ import android.util.Log;
 
 import com.example.hubiottest.R;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,13 +35,14 @@ public class BluetoothLeService extends Service {
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
 
-    private final String serviceUUID = "00001800-0000-1000-8000-00805f9b34fb";
-    //"4fafc201-1fb5-459e-8fcc-c5c9c331914b\"
+    //    private final String serviceUUID = "00001800-0000-1000-8000-00805f9b34fb";
+    private final String serviceUUID = "000018AA-0000-1000-8000-00805f9b34fb";
     private final String READ_NAME_HUB_UUID = "00002a00-0000-1000-8000-00805f9b34fb";
     private final String xxxUUID = "00002a25-0000-1000-8000-00805f9b34fb";
     private final String yyyUUID = "00002a01-0000-1000-8000-00805f9b34fb";
     private final String zzzUUID = "00002a04-0000-1000-8000-00805f9b34fb";
     private final String tttUUID = "00002aa6-0000-1000-8000-00805f9b34fb";
+    private final String BLEWriteUUID = "00002aaa-0000-1000-8000-00805f9b34fb";
 
     public final static String ACTION_GATT_CONNECTED =
             "ACTION_GATT_CONNECTED";
@@ -107,6 +109,7 @@ public class BluetoothLeService extends Service {
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
+
                 broadcastUpdate(characteristic, status);
             }
         }
@@ -115,6 +118,10 @@ public class BluetoothLeService extends Service {
         public void onCharacteristicWrite(BluetoothGatt gatt,
                                           BluetoothGattCharacteristic characteristic,
                                           int status) {
+            Log.e("TEST", "onCharacteristicWrite status: " + status);
+            String s = new String(characteristic.getValue(), StandardCharsets.UTF_8);
+            Log.e("TEST", "onCharacteristicWrite status: " + s);
+
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 readCustomCharacteristic();
             }
@@ -282,14 +289,24 @@ public class BluetoothLeService extends Service {
         }
         /*get the read characteristic from the service*/
         BluetoothGattCharacteristic mReadCharacteristic = mCustomService.
-                getCharacteristic(UUID.fromString(xxxUUID));
-//        for (BluetoothGattCharacteristic temp : mReadCharacteristic) {
-//            Log.e("Characteristic: ", temp.getUuid().toString());
-//        }
+                getCharacteristic(UUID.fromString(BLEWriteUUID));
         if (!mBluetoothGatt.readCharacteristic(mReadCharacteristic)) {
             Log.w(TAG, "Failed to read characteristic");
             return;
         }
+
+        /* Get all characteristic from hub
+        List<BluetoothGattCharacteristic> mReadCharacteristic = mCustomService.
+                getCharacteristics();
+        for (BluetoothGattCharacteristic temp : mReadCharacteristic) {
+            Log.e("Characteristic: ", temp.getUuid().toString());
+            if (!mBluetoothGatt.readCharacteristic(temp)) {
+                Log.w(TAG, "Failed to read characteristic");
+                return;
+            }
+        }*/
+
+
 //		Log.i(TAG, mReadCharacteristic.getStringValue(0));
         Log.i(TAG, "Trying to log received value");
     }
@@ -308,10 +325,18 @@ public class BluetoothLeService extends Service {
         }
         /*get the read characteristic from the service*/
         BluetoothGattCharacteristic mWriteCharacteristic = mCustomService
-                .getCharacteristic(UUID.fromString(READ_NAME_HUB_UUID));
-        mWriteCharacteristic.setValue(wifiCredentials);
-        if (!mBluetoothGatt.writeCharacteristic(mWriteCharacteristic)) {
+                .getCharacteristic(UUID.fromString(BLEWriteUUID));
+
+        if ((mWriteCharacteristic.getProperties() | BluetoothGattCharacteristic.PROPERTY_WRITE) > 0) {
+            // set value for GattCharacteristic
+//        byte[] tempBytes = {0x33,0x38, 0x35, 0x39, 0x33, 0x37, 0x00, 0x15, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36};
+            mWriteCharacteristic.setValue(wifiCredentials);
+//        mWriteCharacteristic.setValue(wifiCredentials);
+
+            mBluetoothGatt.writeCharacteristic(mWriteCharacteristic);
+        } else {
             Log.w(TAG, "Failed to write characteristic");
         }
+
     }
 }

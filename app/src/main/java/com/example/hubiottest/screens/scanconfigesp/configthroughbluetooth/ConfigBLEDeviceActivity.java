@@ -112,7 +112,7 @@ public class ConfigBLEDeviceActivity extends AppCompatActivity {
                             // Decode the data
 //                            byte[] decodedData = xorCode(mmDevice.getName(),data.getBytes(),data.length());
                             //String finalData = new String(decodedData);
-
+                            Log.e("ConfigBLEDeviceActivity", data);
                             displayData("Received:\n--\n" + data + "\n--\n");
 
                             // Get stored WiFi credentials from the received data
@@ -264,7 +264,7 @@ public class ConfigBLEDeviceActivity extends AppCompatActivity {
             pwPrimString = pwPrimET.getText().toString();
 
             // Create JSON object
-            JSONObject wifiCreds = new JSONObject();
+            /*JSONObject wifiCreds = new JSONObject();
             try {
                 wifiCreds.put("cmd", "change wifi");
                 if (ssidPrimString.equals("")) {
@@ -288,11 +288,18 @@ public class ConfigBLEDeviceActivity extends AppCompatActivity {
 
             } catch (JSONException e) {
                 e.printStackTrace();
-            }
+            }*/
 //            byte[] decodedData = xorCode(mmDevice.getName()
 //                    ,wifiCreds.toString().getBytes()
 //                    ,wifiCreds.toString().length());
-            Log.d("Khanh", wifiCreds.toString());
+            JSONObject wifiCreds = new JSONObject();
+            try {
+                wifiCreds.put("hash", "333835393337");
+                wifiCreds.put("cmd", "0017");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             mBluetoothLeService.writeCustomCharacteristic(wifiCreds.toString());
             displayData(getResources().getString(R.string.update_config));
         }
