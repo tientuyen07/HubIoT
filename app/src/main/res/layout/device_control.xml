@@ -56,110 +56,19 @@
         android:textColor="@android:color/holo_orange_dark"
         android:textStyle="bold" />
 
+    <EditText
+        android:id="@+id/editCommand"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/eraseBT" />
+
     <TextView
         android:id="@+id/data_value"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/pwPrim"
+        android:layout_below="@+id/editCommand"
         android:layout_alignParentStart="false"
         android:layout_alignParentTop="false"
         android:text="@string/no_data" />
 
-    <Switch
-        android:id="@+id/apNumSelector"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/eraseBT"
-        android:layout_alignParentStart="true"
-        android:checked="false"
-        android:onClick="onClickSwitch"
-        android:text="@string/sel_num_ap" />
-
-    <TextView
-        android:id="@+id/ssidPrimHdr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/apNumSelector"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/center"
-        android:text="@string/ssid_prim"
-        android:textSize="18sp" />
-
-    <EditText
-        android:id="@+id/ssidPrim"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/ssidPrimHdr"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/center"
-        android:hint="@string/ssid_prim"
-        android:inputType="textPersonName"
-        tools:ignore="LabelFor" />
-
-    <TextView
-        android:id="@+id/pwPrimHdr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/ssidPrim"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/center"
-        android:text="@string/pw_prim"
-        android:textSize="18sp" />
-
-    <EditText
-        android:id="@+id/pwPrim"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/pwPrimHdr"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/center"
-        android:hint="@string/pw_sec"
-        android:inputType="textPersonName"
-        tools:ignore="LabelFor" />
-
-    <TextView
-        android:id="@+id/ssidSecHdr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/apNumSelector"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/center"
-        android:text="@string/ssid_sec"
-        android:textSize="18sp"
-        android:visibility="invisible" />
-
-    <EditText
-        android:id="@+id/ssidSec"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/ssidSecHdr"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/center"
-        android:hint="@string/ssid_sec"
-        android:inputType="textPersonName"
-        android:visibility="invisible"
-        tools:ignore="LabelFor" />
-
-    <TextView
-        android:id="@+id/pwSecHdr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/ssidSec"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/center"
-        android:text="@string/pw_sec"
-        android:textSize="18sp"
-        android:visibility="invisible" />
-
-    <EditText
-        android:id="@+id/pwSec"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/pwSecHdr"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/center"
-        android:hint="@string/pw_sec"
-        android:inputType="textPersonName"
-        android:visibility="invisible"
-        tools:ignore="LabelFor" />
 </RelativeLayout>

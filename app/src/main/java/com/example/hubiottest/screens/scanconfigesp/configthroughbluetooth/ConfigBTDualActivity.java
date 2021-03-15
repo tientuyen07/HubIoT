@@ -39,18 +39,7 @@ public class ConfigBTDualActivity extends AppCompatActivity {
     private BluetoothSerial bluetoothSerial;
     private BluetoothDevice mmDevice;
 
-    private String ssidPrimString = "";
-    private String pwPrimString = "";
-    private String ssidSecString = "";
-    private String pwSecString = "";
-
     private Boolean doubleApEnabled = false;
-
-    private EditText ssidPrimET;
-    private EditText pwPrimET;
-    private EditText ssidSecET;
-    private EditText pwSecET;
-
     private Menu thisMenu;
 
     private Boolean firstView = true;
@@ -70,10 +59,6 @@ public class ConfigBTDualActivity extends AppCompatActivity {
 
         // Sets up UI references.
         mDataField = findViewById(R.id.data_value);
-        ssidPrimET = findViewById(R.id.ssidPrim);
-        pwPrimET = findViewById(R.id.pwPrim);
-        ssidSecET = findViewById(R.id.ssidSec);
-        pwSecET = findViewById(R.id.pwSec);
 
         //noinspection ConstantConditions
         thisActionBar.setTitle(mDeviceName);
@@ -200,7 +185,7 @@ public class ConfigBTDualActivity extends AppCompatActivity {
     public void onClickWrite(View v){
         if (bluetoothSerial.connected) {
             // Update credentials with last edit text values
-            ssidPrimString = ssidPrimET.getText().toString();
+         /*   ssidPrimString = ssidPrimET.getText().toString();
             pwPrimString = pwPrimET.getText().toString();
             ssidSecString = ssidSecET.getText().toString();
             pwSecString = pwSecET.getText().toString();
@@ -250,8 +235,8 @@ public class ConfigBTDualActivity extends AppCompatActivity {
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
-            }
-            String dataStr = wifiCreds.toString();
+            }*/
+            String dataStr = "wifiCreds.toString()";
             int count = dataStr.length();
             byte[] data = dataStr.getBytes();
 
@@ -328,34 +313,6 @@ public class ConfigBTDualActivity extends AppCompatActivity {
         }
     }
 
-    @SuppressWarnings("unused")
-    public void onClickSwitch(View v){
-        TextView chgHdr;
-        EditText chgEt;
-        Switch enaDoubleAP = findViewById(R.id.apNumSelector);
-        if (enaDoubleAP.isChecked()) {
-            doubleApEnabled = true;
-            chgHdr = findViewById(R.id.ssidSecHdr);
-            chgHdr.setVisibility(View.VISIBLE);
-            chgEt = findViewById(R.id.ssidSec);
-            chgEt.setVisibility(View.VISIBLE);
-            chgHdr = findViewById(R.id.pwSecHdr);
-            chgHdr.setVisibility(View.VISIBLE);
-            chgEt = findViewById(R.id.pwSec);
-            chgEt.setVisibility(View.VISIBLE);
-        } else {
-            doubleApEnabled = false;
-            chgHdr = findViewById(R.id.ssidSecHdr);
-            chgHdr.setVisibility(View.INVISIBLE);
-            chgEt = findViewById(R.id.ssidSec);
-            chgEt.setVisibility(View.INVISIBLE);
-            chgHdr = findViewById(R.id.pwSecHdr);
-            chgHdr.setVisibility(View.INVISIBLE);
-            chgEt = findViewById(R.id.pwSec);
-            chgEt.setVisibility(View.INVISIBLE);
-        }
-    }
-
     private final BluetoothSerial.MessageHandler btSerialRead = new BluetoothSerial.MessageHandler() {
         @Override
         public int read(final int bufferSize, byte[] buffer) {
@@ -378,7 +335,7 @@ public class ConfigBTDualActivity extends AppCompatActivity {
                     JSONObject receivedConfigJSON;
                     try {
                         receivedConfigJSON = new JSONObject(finalData);
-                        if (receivedConfigJSON.has("ssidPrim")) {
+                        /*if (receivedConfigJSON.has("ssidPrim")) {
                             ssidPrimString = receivedConfigJSON.getString("ssidPrim");
                             ssidPrimET.setText(ssidPrimString);
                         }
@@ -393,7 +350,7 @@ public class ConfigBTDualActivity extends AppCompatActivity {
                         if (receivedConfigJSON.has("pwSec")) {
                             pwSecString = receivedConfigJSON.getString("pwSec");
                             pwSecET.setText(pwSecString);
-                        }
+                        }*/
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

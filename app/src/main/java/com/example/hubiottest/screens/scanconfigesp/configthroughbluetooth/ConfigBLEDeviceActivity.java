@@ -36,13 +36,8 @@ public class ConfigBLEDeviceActivity extends AppCompatActivity {
     private boolean mConnected = false;
     private BluetoothDevice mmDevice;
 
-    private String ssidPrimString = "";
-    private String pwPrimString = "";
+    private EditText edtCommand;
 
-    private EditText ssidPrimET;
-    private EditText pwPrimET;
-    private EditText ssidSecET;
-    private EditText pwSecET;
 
     private Menu thisMenu;
 
@@ -153,6 +148,8 @@ public class ConfigBLEDeviceActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.device_control);
+        edtCommand = findViewById(R.id.editCommand);
+
 
 //        final Intent intent = getIntent();
 //        String mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
@@ -165,10 +162,6 @@ public class ConfigBLEDeviceActivity extends AppCompatActivity {
 
         // Sets up UI references.
         mDataField = findViewById(R.id.data_value);
-        ssidPrimET = findViewById(R.id.ssidPrim);
-        pwPrimET = findViewById(R.id.pwPrim);
-        ssidSecET = findViewById(R.id.ssidSec);
-        pwSecET = findViewById(R.id.pwSec);
 
         //noinspection ConstantConditions
 //        getActionBar().setTitle(mDeviceName);
@@ -260,8 +253,6 @@ public class ConfigBLEDeviceActivity extends AppCompatActivity {
         if(mBluetoothLeService != null) {
 
             // Update credentials with last edit text values
-            ssidPrimString = ssidPrimET.getText().toString();
-            pwPrimString = pwPrimET.getText().toString();
 
             // Create JSON object
             /*JSONObject wifiCreds = new JSONObject();
@@ -292,15 +283,15 @@ public class ConfigBLEDeviceActivity extends AppCompatActivity {
 //            byte[] decodedData = xorCode(mmDevice.getName()
 //                    ,wifiCreds.toString().getBytes()
 //                    ,wifiCreds.toString().length());
-            JSONObject wifiCreds = new JSONObject();
-            try {
-                wifiCreds.put("hash", "333835393337");
-                wifiCreds.put("cmd", "0017");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+//            JSONObject wifiCreds = new JSONObject();
+//            try {
+//                wifiCreds.put("hash", "333835393337");
+//                wifiCreds.put("cmd", "0017");
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
 
-            mBluetoothLeService.writeCustomCharacteristic(wifiCreds.toString());
+            mBluetoothLeService.writeCustomCharacteristic(edtCommand.getText().toString());
             displayData(getResources().getString(R.string.update_config));
         }
     }
@@ -348,32 +339,6 @@ public class ConfigBLEDeviceActivity extends AppCompatActivity {
 //                    ,wifiCreds.toString().length());
             mBluetoothLeService.writeCustomCharacteristic(wifiCreds.toString());
             displayData(getResources().getString(R.string.erase_config));
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public void onClickSwitch(View v){
-        TextView chgHdr;
-        EditText chgEt;
-        Switch enaDoubleAP = findViewById(R.id.apNumSelector);
-        if (enaDoubleAP.isChecked()) {
-            chgHdr = findViewById(R.id.ssidSecHdr);
-            chgHdr.setVisibility(View.VISIBLE);
-            chgEt = findViewById(R.id.ssidSec);
-            chgEt.setVisibility(View.VISIBLE);
-            chgHdr = findViewById(R.id.pwSecHdr);
-            chgHdr.setVisibility(View.VISIBLE);
-            chgEt = findViewById(R.id.pwSec);
-            chgEt.setVisibility(View.VISIBLE);
-        } else {
-            chgHdr = findViewById(R.id.ssidSecHdr);
-            chgHdr.setVisibility(View.INVISIBLE);
-            chgEt = findViewById(R.id.ssidSec);
-            chgEt.setVisibility(View.INVISIBLE);
-            chgHdr = findViewById(R.id.pwSecHdr);
-            chgHdr.setVisibility(View.INVISIBLE);
-            chgEt = findViewById(R.id.pwSec);
-            chgEt.setVisibility(View.INVISIBLE);
         }
     }
 }

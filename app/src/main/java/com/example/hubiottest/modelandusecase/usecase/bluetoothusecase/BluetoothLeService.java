@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -21,7 +22,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
+import static android.bluetooth.BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT;
+
 public class BluetoothLeService extends Service {
+
     public interface CallbackToEspListFragment {
         void onServiceConnected(boolean isServiceConnected);
     }
@@ -35,14 +39,16 @@ public class BluetoothLeService extends Service {
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
 
-    //    private final String serviceUUID = "00001800-0000-1000-8000-00805f9b34fb";
-    private final String serviceUUID = "000018AA-0000-1000-8000-00805f9b34fb";
+    // private final String serviceUUID = "00001800-0000-1000-8000-00805f9b34fb";
     private final String READ_NAME_HUB_UUID = "00002a00-0000-1000-8000-00805f9b34fb";
     private final String xxxUUID = "00002a25-0000-1000-8000-00805f9b34fb";
     private final String yyyUUID = "00002a01-0000-1000-8000-00805f9b34fb";
     private final String zzzUUID = "00002a04-0000-1000-8000-00805f9b34fb";
     private final String tttUUID = "00002aa6-0000-1000-8000-00805f9b34fb";
-    private final String BLEWriteUUID = "00002aaa-0000-1000-8000-00805f9b34fb";
+
+    private final UUID BLE_WRITE_SERVICE_UUID = convertFromInteger(0x18AA);
+    private final UUID BLE_WRITE_CHARACTERISTIC_UUID = convertFromInteger(0x2aaa);
+    private final UUID BLE_CCCD_UUID = convertFromInteger(0x2902);
 
     public final static String ACTION_GATT_CONNECTED =
             "ACTION_GATT_CONNECTED";
@@ -90,14 +96,30 @@ public class BluetoothLeService extends Service {
                 StringBuilder serviceDiscovery;
 
                 List<BluetoothGattService> gattServices = mBluetoothGatt.getServices();
-                Log.e("onServicesDiscovered", "Services count: " + gattServices.size());
+//                Log.e("onServicesDiscovered", "Services count: " + gattServices.size());
                 serviceDiscovery = new StringBuilder("Found " + gattServices.size() + " services\n");
                 for (BluetoothGattService gattService : gattServices) {
                     String serviceUUID = gattService.getUuid().toString();
                     Log.e("onServicesDiscovered", "Service uuid " + serviceUUID);
                     serviceDiscovery.append("Service uuid ").append(serviceUUID).append("\n");
+                    for (BluetoothGattCharacteristic characteristic : gattService.getCharacteristics()) {
+                        Log.e("onServiceDiscovered", "Characteristic uuid" + characteristic.getUuid().toString());
+                    }
                 }
-                broadcastUpdate(serviceDiscovery.toString());
+
+//                broadcastUpdate(serviceDiscovery.toString());
+
+                BluetoothGattCharacteristic characteristic =
+                        gatt.getService(BLE_WRITE_SERVICE_UUID)
+                                .getCharacteristic(BLE_WRITE_CHARACTERISTIC_UUID);
+                characteristic.setWriteType(WRITE_TYPE_DEFAULT);
+
+//                Log.e("TEST",
+//                        "Set notification: " + gatt.setCharacteristicNotification(characteristic, true));
+
+                BluetoothGattDescriptor descriptor = characteristic.getDescriptor(BLE_CCCD_UUID);
+                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                Log.e("TEST", "Set Notification: " + gatt.writeDescriptor(descriptor));
 
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
@@ -105,12 +127,30 @@ public class BluetoothLeService extends Service {
         }
 
         @Override
+        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+            super.onDescriptorWrite(gatt, descriptor, status);
+            Log.e("TEST", "onDescriptorWrite");
+
+            BluetoothGattCharacteristic characteristic =
+                    gatt.getService(BLE_WRITE_SERVICE_UUID)
+                            .getCharacteristic(BLE_WRITE_CHARACTERISTIC_UUID);
+            characteristic.setValue(new byte[]{0x00, 0x15, 0x39, 0x32, 0x36, 0x34, 0x36, 0x32});
+
+            mBluetoothGatt.writeCharacteristic(characteristic);
+        }
+
+        @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
 
-                broadcastUpdate(characteristic, status);
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.e("TEST", "onCharacteristicRead status: " + "GATT_READ_SUCCESS");
+//                broadcastUpdate(characteristic, status);
+                String s = new String(characteristic.getValue(), StandardCharsets.UTF_8);
+                Log.e("TEST", "onCharacteristicRead status: " + s);
+            } else if (status == BluetoothGatt.GATT_FAILURE) {
+                Log.e("TEST", "onCharacteristicRead status: " + "GATT_READ_FAIL");
             }
         }
 
@@ -118,19 +158,29 @@ public class BluetoothLeService extends Service {
         public void onCharacteristicWrite(BluetoothGatt gatt,
                                           BluetoothGattCharacteristic characteristic,
                                           int status) {
-            Log.e("TEST", "onCharacteristicWrite status: " + status);
-            String s = new String(characteristic.getValue(), StandardCharsets.UTF_8);
-            Log.e("TEST", "onCharacteristicWrite status: " + s);
+            switch (status) {
+                case BluetoothGatt.GATT_SUCCESS:
+                    Log.e("TEST", "onCharacteristicWrite status: " + "GATT_WRITE_SUCCESS");
+                    break;
+                case BluetoothGatt.GATT_FAILURE:
+                    Log.e("TEST", "onCharacteristicWrite status: " + "GATT_WRITE_FAILURE");
+                    break;
+            }
+
+
+            Log.e("TEST", "onCharacteristicWrite status: " + characteristic.getStringValue(0));
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                readCustomCharacteristic();
+//                readCustomCharacteristic();
             }
         }
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
-            broadcastUpdate(characteristic, 0);
+            String s = new String(characteristic.getValue(), StandardCharsets.UTF_8);
+            Log.e("TEST", "onCharacteristicChanged status: " + s);
+//            broadcastUpdate(characteristic, 0);
         }
     };
 
@@ -282,16 +332,19 @@ public class BluetoothLeService extends Service {
         }
         /*check if the service is available on the device*/
         BluetoothGattService mCustomService = mBluetoothGatt.
-                getService(UUID.fromString(serviceUUID));
+                getService(BLE_WRITE_SERVICE_UUID);
         if (mCustomService == null) {
             Log.w(TAG, "Custom BLE Service not found");
             return;
         }
         /*get the read characteristic from the service*/
         BluetoothGattCharacteristic mReadCharacteristic = mCustomService.
-                getCharacteristic(UUID.fromString(BLEWriteUUID));
-        if (!mBluetoothGatt.readCharacteristic(mReadCharacteristic)) {
-            Log.w(TAG, "Failed to read characteristic");
+                getCharacteristic(BLE_WRITE_CHARACTERISTIC_UUID);
+
+        if ((mReadCharacteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
+            mBluetoothGatt.readCharacteristic(mReadCharacteristic);
+        } else {
+            Log.w(TAG, "Failed to get Properties()");
             return;
         }
 
@@ -311,32 +364,53 @@ public class BluetoothLeService extends Service {
         Log.i(TAG, "Trying to log received value");
     }
 
-    public void writeCustomCharacteristic(String wifiCredentials) {
+    public void writeCustomCharacteristic(String editCommand) {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
         /*check if the service is available on the device*/
         BluetoothGattService mCustomService = mBluetoothGatt
-                .getService(UUID.fromString(serviceUUID));
+                .getService(BLE_WRITE_SERVICE_UUID);
         if (mCustomService == null) {
             Log.w(TAG, "Custom BLE Service not found");
+
             return;
         }
         /*get the read characteristic from the service*/
         BluetoothGattCharacteristic mWriteCharacteristic = mCustomService
-                .getCharacteristic(UUID.fromString(BLEWriteUUID));
+                .getCharacteristic(BLE_WRITE_CHARACTERISTIC_UUID);
 
+        for (byte a : hexStringToByteArray(editCommand)) {
+            Log.e("BYTE", String.valueOf(a) + " ");
+        }
         if ((mWriteCharacteristic.getProperties() | BluetoothGattCharacteristic.PROPERTY_WRITE) > 0) {
             // set value for GattCharacteristic
 //        byte[] tempBytes = {0x33,0x38, 0x35, 0x39, 0x33, 0x37, 0x00, 0x15, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36};
-            mWriteCharacteristic.setValue(wifiCredentials);
-//        mWriteCharacteristic.setValue(wifiCredentials);
-
+//            mWriteCharacteristic.setValue(new byte[]{1, 1});
+            mWriteCharacteristic.setValue(hexStringToByteArray(editCommand));
             mBluetoothGatt.writeCharacteristic(mWriteCharacteristic);
         } else {
             Log.w(TAG, "Failed to write characteristic");
         }
 
+    }
+
+    private UUID convertFromInteger(int i) {
+        final long MSB = 0x0000000000001000L;
+        final long LSB = 0x800000805f9b34fbL;
+        long value = i & 0xFFFFFFFF;
+        return new UUID(MSB | (value << 32), LSB);
+    }
+
+    /* s must be an even-length string. */
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i + 1), 16));
+        }
+        return data;
     }
 }
