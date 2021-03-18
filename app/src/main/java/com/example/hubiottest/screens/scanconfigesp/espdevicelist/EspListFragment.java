@@ -166,7 +166,6 @@ public class EspListFragment extends AbstractFragment
         mControllerBluetooth.stopScan();
         mBluetoothDevice = bleDevice;
         Log.e("TEST", bleDevice.getAddress() + "");
-        Log.e("TEST", mBluetoothDevice.getAddress() + "");
         mBluetoothLeService.connect(this, mBluetoothDevice.getAddress());
     }
 
@@ -186,6 +185,8 @@ public class EspListFragment extends AbstractFragment
             mToastsHelper.showToast("Location is off! Can not search ble devices");
         }
         deviceList.clear();
+        mViewMvc.bindEsp(deviceList);
+
         mViewMvc.showTextViewAvailable(true);
         mControllerBluetooth.scanBleDevice();
     }

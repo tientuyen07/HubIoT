@@ -13,7 +13,9 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 
 import com.example.hubiottest.R;
@@ -103,7 +105,7 @@ public class BluetoothLeService extends Service {
                     Log.e("onServicesDiscovered", "Service uuid " + serviceUUID);
                     serviceDiscovery.append("Service uuid ").append(serviceUUID).append("\n");
                     for (BluetoothGattCharacteristic characteristic : gattService.getCharacteristics()) {
-                        Log.e("onServiceDiscovered", "Characteristic uuid" + characteristic.getUuid().toString());
+                        Log.e("onServiceDiscovered", "Characteristic uuid " + characteristic.getUuid().toString());
                     }
                 }
 
@@ -112,11 +114,9 @@ public class BluetoothLeService extends Service {
                 BluetoothGattCharacteristic characteristic =
                         gatt.getService(BLE_WRITE_SERVICE_UUID)
                                 .getCharacteristic(BLE_WRITE_CHARACTERISTIC_UUID);
-                characteristic.setWriteType(WRITE_TYPE_DEFAULT);
-
 //                Log.e("TEST",
 //                        "Set notification: " + gatt.setCharacteristicNotification(characteristic, true));
-
+                gatt.setCharacteristicNotification(characteristic, true);
                 BluetoothGattDescriptor descriptor = characteristic.getDescriptor(BLE_CCCD_UUID);
                 descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                 Log.e("TEST", "Set Notification: " + gatt.writeDescriptor(descriptor));
@@ -131,12 +131,14 @@ public class BluetoothLeService extends Service {
             super.onDescriptorWrite(gatt, descriptor, status);
             Log.e("TEST", "onDescriptorWrite");
 
-            BluetoothGattCharacteristic characteristic =
-                    gatt.getService(BLE_WRITE_SERVICE_UUID)
-                            .getCharacteristic(BLE_WRITE_CHARACTERISTIC_UUID);
-            characteristic.setValue(new byte[]{0x00, 0x15, 0x39, 0x32, 0x36, 0x34, 0x36, 0x32});
-
-            mBluetoothGatt.writeCharacteristic(characteristic);
+//            BluetoothGattCharacteristic characteristic =
+//                    gatt.getService(BLE_WRITE_SERVICE_UUID)
+//                            .getCharacteristic(BLE_WRITE_CHARACTERISTIC_UUID);
+//            gatt.setCharacteristicNotification(characteristic, true);
+//            characteristic.setWriteType(WRITE_TYPE_DEFAULT);
+//            characteristic.setValue(new byte[]{0, 6, 0x39, 0x32, 0x36, 0x34, 0x36, 0x32});
+//
+//            mBluetoothGatt.writeCharacteristic(characteristic);
         }
 
         @Override
@@ -178,9 +180,20 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
-            String s = new String(characteristic.getValue(), StandardCharsets.UTF_8);
-            Log.e("TEST", "onCharacteristicChanged status: " + s);
-//            broadcastUpdate(characteristic, 0);
+            // Copy the byte array so we have a threadsafe copy
+            final byte[] value = new byte[characteristic.getValue().length];
+            System.arraycopy(characteristic.getValue(), 0, value, 0, characteristic.getValue().length);
+
+
+            // Characteristic has new value so pass it on for processing
+            Handler bleHandler = new Handler(Looper.getMainLooper());
+            bleHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    // Characteristic has new value so pass it on for processing
+                    Log.e("TEST", "onChanged: " + new String(value, StandardCharsets.UTF_8));
+                }
+            });
         }
     };
 
@@ -370,25 +383,29 @@ public class BluetoothLeService extends Service {
             return;
         }
         /*check if the service is available on the device*/
-        BluetoothGattService mCustomService = mBluetoothGatt
-                .getService(BLE_WRITE_SERVICE_UUID);
-        if (mCustomService == null) {
-            Log.w(TAG, "Custom BLE Service not found");
-
-            return;
-        }
+//        BluetoothGattService mCustomService = ;
+//        if (mCustomService == null) {
+//            Log.w(TAG, "Custom BLE Service not found");
+//
+//            return;
+//        }
         /*get the read characteristic from the service*/
-        BluetoothGattCharacteristic mWriteCharacteristic = mCustomService
+        BluetoothGattCharacteristic mWriteCharacteristic = mBluetoothGatt
+                .getService(BLE_WRITE_SERVICE_UUID)
                 .getCharacteristic(BLE_WRITE_CHARACTERISTIC_UUID);
 
         for (byte a : hexStringToByteArray(editCommand)) {
             Log.e("BYTE", String.valueOf(a) + " ");
         }
+
+
         if ((mWriteCharacteristic.getProperties() | BluetoothGattCharacteristic.PROPERTY_WRITE) > 0) {
             // set value for GattCharacteristic
 //        byte[] tempBytes = {0x33,0x38, 0x35, 0x39, 0x33, 0x37, 0x00, 0x15, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36};
-//            mWriteCharacteristic.setValue(new byte[]{1, 1});
+
             mWriteCharacteristic.setValue(hexStringToByteArray(editCommand));
+            mWriteCharacteristic.setWriteType(WRITE_TYPE_DEFAULT);
+
             mBluetoothGatt.writeCharacteristic(mWriteCharacteristic);
         } else {
             Log.w(TAG, "Failed to write characteristic");
